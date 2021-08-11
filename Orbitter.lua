@@ -21,13 +21,13 @@ function Orbit.new(origin: BasePart, part: BasePart)
 
 	self.maid = Maid.new()
 	self.Origin = originCFrame
-	self.RPS = math.pi
-	self.Angle = 0
 	self.Speed = 1
+	self.RPS = math.pi * self.Speed
+	self.Angle = 0
 	
 	self.maid:GiveTask(RunService.Heartbeat:Connect(
 		function(dt)
-			self.Angle = (self.Angle + dt * self.RPS * self.Speed) % (2 * math.pi)
+			self.Angle = (self.Angle + dt * self.RPS) % (2 * math.pi)
 			part.CFrame = self.Origin * CFrame.new(cos(self.Angle) * Radius, 0 - cos(clock() * 5 * math.pi) / 6, sin(self.Angle) * Radius)
 		end))
 
@@ -51,6 +51,7 @@ end
 
 function Orbit:SetSpeed(speed: number)
 	self.Speed = speed
+	self.RPS *= self.Speed
 end
 
 function Orbit:Stop()
