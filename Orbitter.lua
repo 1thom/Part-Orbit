@@ -8,45 +8,59 @@ local Orbit = {}
 local mtOrbit = {__index = Orbit}
 local Maid = require(script.Parent.Maid)
 
-local Radius = 2
 local cos = math.cos
 local sin = math.sin
 local clock = os.clock
 
 local IDContainer = {}
 
-function Orbit.new(origin: BasePart, part: BasePart)
-	local originCFrame = origin.CFrame
-	local self = {}
+--default configs
+local Configurations = {
+	["Speed"] = 1,
+	["YAxisSpeed"] = 5,
+	["YAxisFrequency"] = 6,
+	["Angle"] = 0,
+	["Radius"] = 2,
+}
 
-	self.maid = Maid.new()
-	self.Origin = originCFrame
-	self.Speed = 1
-	self.RPS = math.pi * self.Speed
-	self.Angle = 0
+function Orbit.new(origin: BasePart, part: BasePart, configurations)
+	local self = {}
 	
+	for key, value in pairs(Configurations) do
+		if not table.find(configurations, key) then
+			configurations[key] = value
+		end
+	end
+	
+	local Origin = origin.CFrame
+	local Angle = configurations["Angle"]
+	
+	self.maid = Maid.new()
+	self.Speed = configurations["Speed"]
+	self.RPS = math.pi * self.Speed
+
 	self.maid:GiveTask(RunService.Heartbeat:Connect(
 		function(dt)
-			self.Angle = (self.Angle + dt * self.RPS) % (2 * math.pi)
-			part.CFrame = self.Origin * CFrame.new(cos(self.Angle) * Radius, 0 - cos(clock() * 5 * math.pi) / 6, sin(self.Angle) * Radius)
+			Angle = (Angle + dt * self.RPS) % (2 * math.pi)
+			part.CFrame = Origin * CFrame.new(cos(Angle) * configurations["Radius"], 0 - cos(clock() * configurations["YAxisSpeed"] * math.pi) / configurations["YAxisFrequency"], sin(Angle) * configurations["Radius"])
 		end))
 
 	self.maid:GiveTask(origin:GetPropertyChangedSignal("CFrame"):Connect(
 		function()
-			self.Origin = origin.CFrame
+			Origin = origin.CFrame
 		end))
 
 	local ID = #IDContainer + 1
 	IDContainer[ID] = self.maid
 	print("Maid ID: "..ID)
 
-	return setmetatable(self, mtOrbit)
+	return setmetatable(self, mtOrbit), ID
 end
 
 function Orbit.IDStop(id)
 	IDContainer[id]:Cleanup()
 	IDContainer[id] = nil
-	print("Cleared maid #"..id)
+	print("Cleared maid: "..id)
 end
 
 function Orbit:SetSpeed(speed: number)
@@ -56,6 +70,7 @@ end
 
 function Orbit:Stop()
 	self.maid:Cleanup()
+	print("Cleared maid")
 end
 
 return Orbit
