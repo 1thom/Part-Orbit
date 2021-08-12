@@ -6,7 +6,7 @@ local RunService = game:GetService("RunService")
 
 local Orbit = {}
 local mtOrbit = {__index = Orbit}
-local Maid = require(script.Maid)
+local Maid = require(script.Parent.Maid)
 
 local Radius = 2
 local cos = math.cos
@@ -15,13 +15,14 @@ local clock = os.clock
 
 local IDContainer = {}
 
-function Orbit.new(origin, part: Instance)
+function Orbit.new(origin: BasePart, part: BasePart)
 	local originCFrame = origin.CFrame
 	local self = {}
-	
+
 	self.maid = Maid.new()
 	self.Origin = originCFrame
-	self.RPS = math.pi
+	self.Speed = 1
+	self.RPS = math.pi * self.Speed
 	self.Angle = 0
 	
 	self.maid:GiveTask(RunService.Heartbeat:Connect(
@@ -34,11 +35,11 @@ function Orbit.new(origin, part: Instance)
 		function()
 			self.Origin = origin.CFrame
 		end))
-	
+
 	local ID = #IDContainer + 1
 	IDContainer[ID] = self.maid
 	print("Maid ID: "..ID)
-	
+
 	return setmetatable(self, mtOrbit)
 end
 
@@ -46,6 +47,11 @@ function Orbit.IDStop(id)
 	IDContainer[id]:Cleanup()
 	IDContainer[id] = nil
 	print("Cleared maid #"..id)
+end
+
+function Orbit:SetSpeed(speed: number)
+	self.Speed = speed
+	self.RPS *= self.Speed
 end
 
 function Orbit:Stop()
