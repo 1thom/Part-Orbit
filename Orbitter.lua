@@ -19,18 +19,33 @@ local Configurations = {
 	["Speed"] = 1,
 	["YAxisSpeed"] = 5,
 	["YAxisFrequency"] = 6,
+	["YAxisPosition"] = 0,
 	["Angle"] = 0,
 	["Radius"] = 2,
 }
 
-function Orbit.new(origin: BasePart, part: BasePart, configurations)
+local function Find(Table, target)
+	local found = false
+	for key, value in pairs(Table) do
+		if key == target or value == target then
+			found = true
+			break
+		end
+	end
+	return found
+end
+
+function Orbit.new(origin: BasePart, part: BasePart, configs)
 	local self = {}
 	
+	local configurations = configs
 	for key, value in pairs(Configurations) do
-		if not table.find(configurations, key) then
+		if not Find(configurations, key) then
 			configurations[key] = value
 		end
 	end
+	
+	print(configurations)
 	
 	local Origin = origin.CFrame
 	local Angle = configurations["Angle"]
@@ -42,7 +57,7 @@ function Orbit.new(origin: BasePart, part: BasePart, configurations)
 	self.maid:GiveTask(RunService.Heartbeat:Connect(
 		function(dt)
 			Angle = (Angle + dt * self.RPS) % (2 * math.pi)
-			part.CFrame = Origin * CFrame.new(cos(Angle) * configurations["Radius"], 0 - cos(clock() * configurations["YAxisSpeed"] * math.pi) / configurations["YAxisFrequency"], sin(Angle) * configurations["Radius"])
+			part.CFrame = Origin * CFrame.new(cos(Angle) * configurations["Radius"], configurations["YAxisPosition"] - cos(clock() * configurations["YAxisSpeed"] * math.pi) / configurations["YAxisFrequency"], sin(Angle) * configurations["Radius"])
 		end))
 
 	self.maid:GiveTask(origin:GetPropertyChangedSignal("CFrame"):Connect(
