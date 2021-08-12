@@ -1,7 +1,3 @@
--- thom463s
--- Orbit
--- August 11, 2021
-
 local RunService = game:GetService("RunService")
 
 local Orbit = {}
@@ -10,6 +6,7 @@ local Maid = require(script.Parent.Maid)
 
 local cos = math.cos
 local sin = math.sin
+local tan = math.tan
 local clock = os.clock
 
 local IDContainer = {}
@@ -22,6 +19,7 @@ local Configurations = {
 	["YAxisPosition"] = 0,
 	["Angle"] = 0,
 	["Radius"] = 2,
+        ["RandomRotation"] = false, 
 }
 
 local function Find(Table, target)
@@ -58,7 +56,10 @@ function Orbit.new(origin: BasePart, part: BasePart, configs)
 		function(dt)
 			Angle = (Angle + dt * self.RPS) % (2 * math.pi)
 			part.CFrame = Origin * CFrame.new(cos(Angle) * configurations["Radius"], configurations["YAxisPosition"] - cos(clock() * configurations["YAxisSpeed"] * math.pi) / configurations["YAxisFrequency"], sin(Angle) * configurations["Radius"])
-		end))
+		        if configurations["RandomRotation"] then
+                                part.CFrame *= CFrame.Angles(cos(Angle) * configurations["Radius"], tan(Angle) * configurations["Radius"], sin(Angle) * configurations["Radius"]) 
+                        end
+                end))
 
 	self.maid:GiveTask(origin:GetPropertyChangedSignal("CFrame"):Connect(
 		function()
